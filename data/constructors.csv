@@ -1,0 +1,169 @@
+constructor_id,name,nationality,Wikipedia_url
+alfa,Alfa Romeo,Swiss,https://en.wikipedia.org/wiki/Alfa_Romeo_in_Formula_One
+lago,Talbot-Lago,French,https://en.wikipedia.org/wiki/Talbot-Lago_T26C
+era,ERA,British,http://en.espn.co.uk/era/motorsport/team/292.html#Profile
+maserati,Maserati,Italian,https://en.wikipedia.org/wiki/Maserati_in_motorsport
+alta,Alta,British,https://f1.fandom.com/wiki/Alta_Car_and_Engineering_Company
+ferrari,Ferrari,Italian,https://en.wikipedia.org/wiki/Scuderia_Ferrari
+simca,Simca,French,https://f1.fandom.com/wiki/Simca-Gordini
+cooper,Cooper,British,https://f1.fandom.com/wiki/Cooper_Car_Company
+kurtis_kraft,Kurtis Kraft,American,https://en.wikipedia.org/wiki/Kurtis_Kraft
+deidt,Deidt,American,https://en.wikipedia.org/wiki/Emil_Diedt
+moore,Moore,American,https://www.formula1points.com/team/Moore
+lesovsky,Lesovsky,American,https://www.formula1points.com/team/Lesovsky
+nichels,Nichels,American,https://www.formula1points.com/team/Nichels
+marchese,Marchese,American,https://f1.fandom.com/wiki/Carl_Marchese
+stevens,Stevens,American,https://f1.fandom.com/wiki/Will_Stevens
+langley,Langley,American,https://en.wikipedia.org/wiki/Langley_(constructor)
+ewing,Ewing,American,https://f1.fandom.com/wiki/Wayne_Ewing
+rae,Rae,American,https://www.4mula1stats.com/team/rae
+olson,Olson,American,https://www.formula1points.com/team/Olson
+wetteroth,Wetteroth,American,https://en.wikipedia.org/wiki/Wetteroth
+snowberger,Snowberger,American,https://en.wikipedia.org/wiki/Russ_Snowberger
+adams,Adams,American,https://en.wikipedia.org/wiki/Adams_(constructor)
+watson,Watson,American,https://en.wikipedia.org/wiki/A._J._Watson
+hwm,HWM,British,https://en.wikipedia.org/wiki/Hersham_and_Walton_Motors
+veritas,Veritas,German,https://en.wikipedia.org/wiki/Veritas_(automobile)
+sherman,Sherman,American,https://en.wikipedia.org/wiki/Roy_Sherman
+schroeder,Schroeder,American,https://en.wikipedia.org/wiki/Gordon_Schroeder
+kuzma,Kuzma,American,https://en.wikipedia.org/wiki/Eddie_Kuzma
+pawl,Pawl,American,https://en.wikipedia.org/wiki/Pawl_(constructor)
+hall,Hall,American,https://en.wikipedia.org/wiki/Hall_(constructor)
+bromme,Bromme,American,https://en.wikipedia.org/wiki/Bromme
+trevis,Trevis,American,https://en.wikipedia.org/wiki/Floyd_Trevis
+brm,BRM,British,https://en.wikipedia.org/wiki/British_Racing_Motors
+gordini,Gordini,French,https://en.wikipedia.org/wiki/Gordini
+frazer_nash,Frazer Nash,British,https://en.wikipedia.org/wiki/Frazer_Nash
+afm,AFM,German,https://en.wikipedia.org/wiki/Alex_von_Falkenhausen_Motorenbau
+butterworth,Aston Butterworth,British,https://en.wikipedia.org/wiki/Aston_Butterworth
+turner,Turner,American,https://en.wikipedia.org/wiki/Mike_Nazaruk
+del_roy,Del Roy,American,https://en.wikipedia.org/wiki/Dallara
+connaught,Connaught,British,https://en.wikipedia.org/wiki/Connaught_Engineering
+phillips,Phillips,American,https://en.wikipedia.org/wiki/Phillips_(constructor)
+pankratz,Pankratz,American,https://en.wikipedia.org/wiki/Pankratz
+mercedes,Mercedes,German,https://en.wikipedia.org/wiki/Mercedes-Benz_in_Formula_One
+lancia,Lancia,Italian,https://en.wikipedia.org/wiki/Scuderia_Lancia
+vanwall,Vanwall,British,
+epperly,Epperly,American,
+dunn,Dunn,American,
+team_lotus,Team Lotus,British,
+porsche,Porsche,German,
+cooper-climax,Cooper-Climax,British,
+cooper-maserati,Cooper-Maserati,British,
+elder,Elder,American,
+vhristensen,Christensen,American,
+sutton,Sutton,American,
+aston_martin,Aston Martin,British,
+cooper-borgward,Cooper-Borgward,British,
+behra-porsche,Behra-Porsche,Italian,
+meskowski,Meskowski,American,
+scarab,Scarab,American,
+lotus-climax,Lotus-Climax,British,
+de_tomaso-osca,De Tomaso-Osca,Italian,
+emeryson,Emeryson,British,
+jbw,JBW,British,
+lola,Lola,British,
+de_tomaso-alfa_romeo,De Tomaso-Alfa Romeo,Italian,
+lotus-brm,Lotus-BRM,British,
+brabham,Brabham,British,
+ats,ATS,Italian,
+scirocco,Scirocco,British,
+tomaso,De Tomaso,Italian,
+brp,BRP,British,
+brabham-climax,Brabham-Climax,British,
+brabham-brm,Brabham-BRM,British,
+brabham-ford,Brabham-Ford,British,
+lds-alfa_romeo,LDS-Alfa Romeo,South African,
+re,RE,Rhodesian,
+honda,Honda,Japanese,
+brabham-repco,Brabham-Repco,British,
+mclaren-ford,McLaren-Ford,British,
+eagle-climax,Eagle-Climax,American,
+mclaren-seren,McLaren-Serenissima,British,
+cooper-ferrari,Cooper-Ferrari,British,
+shannon,Shannon,British,
+lds-climax,LDS-Climax,South African,
+mclaren-brm,McLaren-BRM,British,
+eagle-weslake,Eagle-Weslake,American,
+matra,Matra,French,
+lotus-ford,Lotus-Ford,British,
+cooper-ats,Cooper-ATS,British,
+matra-ford,Matra-Ford,French,
+lds,LDS,South African,
+cooper-brm,Cooper-BRM,British,
+march,March,British,
+tyrrell,Tyrrell,British,
+mclaren,McLaren,British,
+surtees,Surtees,British,
+march-ford,March-Ford,British,
+march-alfa_romeo,March-Alfa Romeo,British,
+lotus-pw,Lotus-Pratt &amp; Whitney,British,
+iso_marlboro,Iso Marlboro,British,
+shadow,Shadow,British,
+tecno,Tecno,Italian,
+hesketh,Hesketh,British,
+trojan,Trojan,British,
+amon,Amon,New Zealander,
+penske,Penske,American,
+shadow-ford,Shadow-Ford,British,
+williams,Williams,British,
+parnelli,Parnelli,American,
+fittipaldi,Fittipaldi,Brazilian,
+hill,Embassy Hill,British,
+ensign,Ensign,British,
+wolf,Wolf,Canadian,
+brabham-alfa_romeo,Brabham-Alfa Romeo,British,
+ligier,Ligier,French,
+boro,Boro,Dutch,
+merzario,Merzario,Italian,
+arrows,Arrows,British,
+renault,Renault,French,
+theodore,Theodore,Hong Kong,
+osella,Osella,Italian,
+toleman,Toleman,British,
+ram,RAM,British,
+spirit,Spirit,British,
+minardi,Minardi,Italian,
+zakspeed,Zakspeed,German,
+benetton,Benetton,Italian,
+ags,AGS,French,
+larrousse,Larrousse,French,
+rial,Rial,German,
+coloni,Coloni,Italian,
+eurobrun,Euro Brun,Italian,
+dallara,Dallara,Italian,
+leyton,Leyton House,British,
+onyx,Onyx,British,
+lambo,Lambo,Italian,
+jordan,Jordan,Irish,
+footwork,Footwork,British,
+fondmetal,Fondmetal,Italian,
+sauber,Sauber,Swiss,
+simtek,Simtek,British,
+pacific,Pacific,British,
+forti,Forti,Italian,
+prost,Prost,French,
+stewart,Stewart,British,
+bar,BAR,British,
+jaguar,Jaguar,British,
+toyota,Toyota,Japanese,
+red_bull,Red Bull,Austrian,
+toro_rosso,Toro Rosso,Italian,
+bmw_sauber,BMW Sauber,German,
+mf1,MF1,Russian,
+super_aguri,Super Aguri,Japanese,
+spyker,Spyker,Dutch,
+force_india,Force India,Indian,
+brawn,Brawn,British,
+lotus_racing,Lotus,Malaysian,
+hrt,HRT,Spanish,
+virgin,Virgin,British,
+lotus_f1,Lotus F1,British,
+marussia,Marussia,Russian,
+caterham,Caterham,Malaysian,
+manor,Manor Marussia,British,
+haas,Haas F1 Team,American,
+racing_point,Racing Point,British,
+alphatauri,AlphaTauri,Italian,
+alpine,Alpine F1 Team,French,
+rb,RB F1 Team,Italian,

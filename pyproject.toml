@@ -1,0 +1,16 @@
+[project]
+name = "F1_FAQ_Engine"
+version = "0.1.0"
+dependencies = [
+    "autopep8>=2.3.2",
+    "chardet>=5.2.0",
+    "pandas>=2.3.3",
+    "python-dotenv>=1.2.1",
+    "sentence-transformers>=5.2.0",
+    "weaviate-client>=4.19.2",
+]
+[tool.autopep8]
+max_line_length = 88
+ignore = ["E203", "W503"]
+recursive = true
+aggressive = 2
