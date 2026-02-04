@@ -16,9 +16,9 @@ def read_csv_with_encoding(file_path):
     encoding = result['encoding']
     confidence = result["confidence"]
     print(
-        f"Reading {
-            os.path.basename(file_path)} as {encoding} ({
-            confidence:.2f} confidence)")
+        f"Reading {os.path.basename(file_path)} as {encoding} "
+        f"({confidence:.2f} confidence)"
+    )
     return pd.read_csv(file_path, encoding=encoding)
 
 
@@ -42,6 +42,11 @@ drivers = dataframes.get('drivers')
 constructors = dataframes.get('constructors')
 circuits = dataframes.get('circuits')
 
+# Normalize column names (handle trailing spaces like in circuits.csv)
+for df in [races, results, drivers, constructors, circuits]:
+    if df is not None:
+        df.columns = df.columns.str.strip()
+
 # Merge Data
 print("Merging data...")
 df = results.merge(races, on='race_id')
@@ -59,8 +64,13 @@ df.rename(columns={'name_x': 'constructor_name',
                    'name_y': 'circuit_name'
                    }, inplace=True)
 df = df[['season', 'race_name', 'driver_name', 'driver_surname',
-         'constructor_name', 'position_order', 'points', 'round',
-         'date', 'circuit_name']]
+         'constructor_name', 'position', 'position_order', 'points', 'round',
+         'date', 'time', 'circuit_name', 'grid', 'laps', 'status']]
+
+# Ensure numeric columns are parsed safely
+numeric_cols = ['season', 'round', 'position_order', 'points', 'grid', 'laps']
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
 
 
 # Fill remaining NaN with empty strings
@@ -77,10 +87,15 @@ model = SentenceTransformer('BAAI/BGE-M3')
 print("Creating text descriptions...")
 texts = []
 for _, row in df.iterrows():
-    position = int(row['position_order'])
-    points = float(row['points'])
+    position = int(row['position_order']) if row['position_order'] != '' else None
+    points = float(row['points']) if row['points'] != '' else None
+    grid = int(row['grid']) if row['grid'] != '' else None
+    laps = int(row['laps']) if row['laps'] != '' else None
+    status = str(row['status']) if row['status'] != '' else None
 
-    if position == 1:
+    if position is None:
+        position_text = "had no classified finishing position"
+    elif position == 1:
         position_text = "won the race, finishing in first place"
     elif position == 2:
         position_text = "finished in second place"
@@ -93,13 +108,20 @@ for _, row in df.iterrows():
             suffix = {1: "st", 2: "nd", 3: "rd"}.get(position % 10, "th")
         position_text = f"finished in {position}{suffix} place"
 
-    if points > 0:
+    if points is None:
+        points_text = "points not recorded"
+    elif points > 0:
         points_text = f"scoring {points} championship points"
     else:
         points_text = "outside the points"
 
+    grid_text = f"starting from grid position {grid}" if grid is not None else ""
+    laps_text = f"completed {laps} laps" if laps is not None else ""
+    status_text = f"status: {status}" if status else ""
+    extra_bits = ", ".join([t for t in [grid_text, laps_text, status_text] if t])
+
     # Format 1: For winners and podium (emphasize achievement)
-    if position <= 3:
+    if position is not None and position <= 3:
         text = (
             f"{row['driver_name']} {row['driver_surname']} "
             f"{position_text} "
@@ -116,6 +138,8 @@ for _, row in df.iterrows():
             f"driving for {row['constructor_name']} "
             f"{position_text}, {points_text} on {row['date']}."
         )
+    if extra_bits:
+        text = f"{text} ({extra_bits})"
     texts.append(text)
 
 
@@ -133,9 +157,14 @@ for idx, (_, row) in enumerate(df.iterrows()):
         "driver_name": f"{str(row['driver_name'])} {str(row['driver_surname'])}",
         "constructor_name": str(row["constructor_name"]),
         "circuit_name": str(row["circuit_name"]),
-        "position": int(row["position_order"]),
-        "points": float(row["points"]),
+        "position": int(row["position_order"]) if row["position_order"] != '' else None,
+        "position_text": str(row["position"]) if row["position"] != '' else "",
+        "points": float(row["points"]) if row["points"] != '' else None,
         "round": int(row["round"]),
+        "grid": int(row["grid"]) if row["grid"] != '' else None,
+        "laps": int(row["laps"]) if row["laps"] != '' else None,
+        "status": str(row["status"]) if row["status"] != '' else "",
+        "race_time": str(row["time"]) if row["time"] != '' else "",
         "vector": vectors[idx].tolist()  # <--- We send the pre-calculated vector
     })
 
@@ -181,8 +210,13 @@ try:
             Property(name="constructor_name", data_type=DataType.TEXT),
             Property(name="circuit_name", data_type=DataType.TEXT),
             Property(name="position", data_type=DataType.INT),
+            Property(name="position_text", data_type=DataType.TEXT),
             Property(name="points", data_type=DataType.NUMBER),
             Property(name="round", data_type=DataType.INT),
+            Property(name="grid", data_type=DataType.INT),
+            Property(name="laps", data_type=DataType.INT),
+            Property(name="status", data_type=DataType.TEXT),
+            Property(name="race_time", data_type=DataType.TEXT),
         ],
         # Optimize vector index for better retrieval
         vector_config=Configure.Vectors.self_provided(
@@ -209,8 +243,13 @@ try:
                     "constructor_name": obj["constructor_name"],
                     "circuit_name": obj["circuit_name"],
                     "position": obj["position"],
+                    "position_text": obj["position_text"],
                     "points": obj["points"],
-                    "round": obj["round"]
+                    "round": obj["round"],
+                    "grid": obj["grid"],
+                    "laps": obj["laps"],
+                    "status": obj["status"],
+                    "race_time": obj["race_time"]
                 },
                 vector=obj["vector"]  # Manually inject the vector
             )
