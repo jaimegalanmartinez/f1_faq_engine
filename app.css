@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+body, .gradio-container {
+    font-family: 'Inter', Arial, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: #eef1f6;
+}
+.gr-button, button, .gradio-container button {
+    background: #dbeafe !important;
+    border: 1px solid #bfdbfe !important;
+    color: #1e3a8a !important;
+}
+.gr-button:hover, button:hover, .gradio-container button:hover {
+    background: #cfe1ff !important;
+}
+.gr-text-input, .gr-textbox, input, textarea {
+    border-color: #bfdbfe !important;
+    box-shadow: none !important;
+}
+.gr-text-input:focus, .gr-textbox:focus, input:focus, textarea:focus,
+.gr-text-input:focus-visible, .gr-textbox:focus-visible {
+    border-color: #93c5fd !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+    outline: none !important;
+}
+@media (min-width: 1200px) {
+    #chatbot {
+        height: 900px !important;
+    }
+    #chatbot .wrap {
+        max-height: 900px !important;
+    }
+}
+@media (max-width: 900px) {
+    #chatbot {
+        height: 24vh !important;
+    }
+    #chatbot .wrap {
+        max-height: 24vh !important;
+    }
+    .gr-row {
+        gap: 8px !important;
+    }
+    .gr-button {
+        width: 100% !important;
+    }
+    .gr-textbox, .gr-text-input {
+        min-height: 64px !important;
+    }
+    .gr-textbox textarea, .gr-text-input textarea, textarea {
+        min-height: 64px !important;
+    }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+    #chatbot {
+        height: 18vh !important;
+    }
+    #chatbot .wrap {
+        max-height: 18vh !important;
+    }
+}
+@media (prefers-color-scheme: dark) {
+    body, .gradio-container {
+        background: #0f1115;
+        color: #e7e9ee;
+    }
+    .gr-block, .gr-box, .gr-panel {
+        background: #161a22 !important;
+        border: 1px solid #232a3a !important;
+    }
+    .gr-button, button, .gradio-container button {
+        background: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #e5e7eb !important;
+    }
+    .gr-button:hover, button:hover, .gradio-container button:hover {
+        background: #273244 !important;
+    }
+}
+:root[data-theme="dark"], body.dark, .dark {
+    background: #0f1115 !important;
+    color: #e7e9ee !important;
+}
+:root[data-theme="dark"] .gradio-container,
+body.dark .gradio-container,
+.dark .gradio-container {
+    background: #0f1115 !important;
+    color: #e7e9ee !important;
+}
+:root[data-theme="dark"] .gr-block,
+:root[data-theme="dark"] .gr-box,
+:root[data-theme="dark"] .gr-panel,
+body.dark .gr-block,
+body.dark .gr-box,
+body.dark .gr-panel,
+.dark .gr-block,
+.dark .gr-box,
+.dark .gr-panel {
+    background: #161a22 !important;
+    border: 1px solid #232a3a !important;
+}
+:root[data-theme="dark"] .gr-button,
+:root[data-theme="dark"] button,
+:root[data-theme="dark"] .gradio-container button,
+body.dark .gr-button,
+body.dark button,
+body.dark .gradio-container button,
+.dark .gr-button,
+.dark button,
+.dark .gradio-container button {
+    background: #1f2937 !important;
+    border: 1px solid #374151 !important;
+    color: #e5e7eb !important;
+}
+:root[data-theme="dark"] .gr-button:hover,
+:root[data-theme="dark"] button:hover,
+:root[data-theme="dark"] .gradio-container button:hover,
+body.dark .gr-button:hover,
+body.dark button:hover,
+body.dark .gradio-container button:hover,
+.dark .gr-button:hover,
+.dark button:hover,
+.dark .gradio-container button:hover {
+    background: #273244 !important;
+}
+#chatbot {
+    height: clamp(220px, 50vh, 700px) !important;
+    overflow: auto !important;
+}
