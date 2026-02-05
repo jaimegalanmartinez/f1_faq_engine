@@ -9,8 +9,28 @@ from weaviate.classes.init import Auth
 from dotenv import load_dotenv
 
 
+_REQUIRED_COLUMNS_BY_FILE = {
+    "races.csv": {"raceId", "year", "round", "circuitId", "name", "date", "time"},
+    "results.csv": {
+        "raceId",
+        "driverId",
+        "constructorId",
+        "grid",
+        "position",
+        "positionOrder",
+        "points",
+        "laps",
+        "statusId",
+    },
+    "drivers.csv": {"driverId", "forename", "surname", "dob", "nationality"},
+    "constructors.csv": {"constructorId", "name", "nationality"},
+    "circuits.csv": {"circuitId", "name", "location", "country"},
+    "status.csv": {"statusId", "status"},
+}
+
+
 def read_csv_with_encoding(file_path):
-    """Read CSV with automatic encoding detection."""
+    """Read CSV with automatic encoding detection and UTF-8 fallback."""
     with open(file_path, 'rb') as f:
         result = chardet.detect(f.read())
     encoding = result['encoding']
@@ -19,7 +39,21 @@ def read_csv_with_encoding(file_path):
         f"Reading {os.path.basename(file_path)} as {encoding} "
         f"({confidence:.2f} confidence)"
     )
-    return pd.read_csv(file_path, encoding=encoding)
+    if encoding and encoding.upper() in {"EUC-JP", "SHIFT_JIS", "SHIFT-JIS", "CP932"}:
+        encoding = "utf-8"
+    try:
+        dataframe = pd.read_csv(file_path, encoding=encoding)
+    except UnicodeDecodeError:
+        dataframe = pd.read_csv(file_path, encoding="utf-8")
+
+    basename = os.path.basename(file_path)
+    required = _REQUIRED_COLUMNS_BY_FILE.get(basename)
+    if required:
+        cols = {c.strip() for c in dataframe.columns}
+        if not required.issubset(cols):
+            dataframe = pd.read_csv(file_path, encoding="utf-8")
+            dataframe.columns = dataframe.columns.str.strip()
+    return dataframe
 
 
 file_map = {
@@ -36,6 +70,18 @@ for name, path in file_map.items():
     if os.path.exists(path):
         dataframes[name] = read_csv_with_encoding(path)
 
+# Optional lookup for status
+status_lookup = {}
+status_path = os.path.join("data", "status.csv")
+if os.path.exists(status_path):
+    status_df = read_csv_with_encoding(status_path)
+    status_df.columns = status_df.columns.str.strip()
+    for _, row in status_df.iterrows():
+        status_id = str(row.get("statusId", "")).strip()
+        status = str(row.get("status", "")).strip()
+        if status_id and status:
+            status_lookup[status_id] = status
+
 races = dataframes.get('races')
 results = dataframes.get('results')
 drivers = dataframes.get('drivers')
@@ -43,32 +89,55 @@ constructors = dataframes.get('constructors')
 circuits = dataframes.get('circuits')
 
 # Normalize column names (handle trailing spaces like in circuits.csv)
-for df in [races, results, drivers, constructors, circuits]:
-    if df is not None:
-        df.columns = df.columns.str.strip()
+for frame in [races, results, drivers, constructors, circuits]:
+    if frame is not None:
+        frame.columns = frame.columns.str.strip()
+        if "url" in frame.columns:
+            frame.drop(columns=["url"], inplace=True)
 
-# Merge Data
+# Normalize column names for consistency before merging
+if races is not None:
+    races = races.rename(columns={"name": "race_name"})
+if drivers is not None:
+    drivers = drivers.rename(
+        columns={
+            "forename": "driver_name",
+            "surname": "driver_surname"})
+if constructors is not None:
+    constructors = constructors.rename(columns={"name": "constructor_name"})
+if circuits is not None:
+    circuits = circuits.rename(columns={"name": "circuit_name"})
+if results is not None:
+    results = results.rename(
+        columns={"positionOrder": "position_order", "time": "result_time"}
+    )
+
+# Merge Data (Rohan Rao schema)
 print("Merging data...")
-df = results.merge(races, on='race_id')
-df = df.merge(drivers, on='driver_id')
-df = df.merge(constructors, on='constructor_id')
-df = df.merge(circuits, on='circuit_id')
+df = results.merge(races, on='raceId')
+df = df.merge(drivers, on='driverId')
+df = df.merge(constructors, on='constructorId')
+df = df.merge(circuits, on='circuitId')
 
 
 # Clean and prepare dataframe
-df.rename(columns={'name_x': 'constructor_name',
-                   'givenName': 'driver_name',
-                   'familyName': 'driver_surname',
-                   'nationality_x': 'driver_nationality',
-                   'nationality_y': 'constructor_nationality',
-                   'name_y': 'circuit_name'
-                   }, inplace=True)
-df = df[['season', 'race_name', 'driver_name', 'driver_surname',
+df = df.replace("\\N", "")
+if "result_time" not in df.columns:
+    df["result_time"] = ""
+if "statusId" in df.columns:
+    if status_lookup:
+        df["status"] = df["statusId"].astype(str).map(status_lookup).fillna("")
+    else:
+        df["status"] = df["statusId"].astype(str)
+else:
+    df["status"] = ""
+
+df = df[['year', 'race_name', 'driver_name', 'driver_surname',
          'constructor_name', 'position', 'position_order', 'points', 'round',
-         'date', 'time', 'circuit_name', 'grid', 'laps', 'status']]
+         'date', 'result_time', 'circuit_name', 'grid', 'laps', 'status']]
 
 # Ensure numeric columns are parsed safely
-numeric_cols = ['season', 'round', 'position_order', 'points', 'grid', 'laps']
+numeric_cols = ['year', 'round', 'position_order', 'points', 'grid', 'laps']
 for col in numeric_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
@@ -125,14 +194,14 @@ for _, row in df.iterrows():
         text = (
             f"{row['driver_name']} {row['driver_surname']} "
             f"{position_text} "
-            f"at the {row['race_name']} in {int(row['season'])}, "
+            f"at the {row['race_name']} in {int(row['year'])}, "
             f"racing for {row['constructor_name']} at {row['circuit_name']}. "
             f"This was Round {int(row['round'])} on {row['date']}, {points_text}."
         )
     # Format 2: Not in podium
     else:
         text = (
-            f"In the {int(row['season'])} {row['race_name']} "
+            f"In the {int(row['year'])} {row['race_name']} "
             f"at {row['circuit_name']} (Round {int(row['round'])}), "
             f"{row['driver_name']} {row['driver_surname']} "
             f"driving for {row['constructor_name']} "
@@ -144,7 +213,7 @@ for _, row in df.iterrows():
 
 
 print(f"Encoding {len(texts)} texts. with batch processing...")
-vectors = model.encode(texts, show_progress_bar=True, batch_size=32)
+vectors = model.encode(texts, show_progress_bar=True, batch_size=16)
 
 
 print("Preparing data objects...")
@@ -152,19 +221,18 @@ data_objects = []
 for idx, (_, row) in enumerate(df.iterrows()):
     data_objects.append({
         "content": texts[idx],
-        "year": int(row["season"]),
+        "year": int(row["year"]),
         "race_name": str(row['race_name']),
         "driver_name": f"{str(row['driver_name'])} {str(row['driver_surname'])}",
         "constructor_name": str(row["constructor_name"]),
         "circuit_name": str(row["circuit_name"]),
         "position": int(row["position_order"]) if row["position_order"] != '' else None,
-        "position_text": str(row["position"]) if row["position"] != '' else "",
         "points": float(row["points"]) if row["points"] != '' else None,
         "round": int(row["round"]),
         "grid": int(row["grid"]) if row["grid"] != '' else None,
         "laps": int(row["laps"]) if row["laps"] != '' else None,
         "status": str(row["status"]) if row["status"] != '' else "",
-        "race_time": str(row["time"]) if row["time"] != '' else "",
+        "result_time": str(row["result_time"]) if row["result_time"] != '' else "",
         "vector": vectors[idx].tolist()  # <--- We send the pre-calculated vector
     })
 
@@ -210,13 +278,12 @@ try:
             Property(name="constructor_name", data_type=DataType.TEXT),
             Property(name="circuit_name", data_type=DataType.TEXT),
             Property(name="position", data_type=DataType.INT),
-            Property(name="position_text", data_type=DataType.TEXT),
             Property(name="points", data_type=DataType.NUMBER),
             Property(name="round", data_type=DataType.INT),
             Property(name="grid", data_type=DataType.INT),
             Property(name="laps", data_type=DataType.INT),
             Property(name="status", data_type=DataType.TEXT),
-            Property(name="race_time", data_type=DataType.TEXT),
+            Property(name="result_time", data_type=DataType.TEXT),
         ],
         # Optimize vector index for better retrieval
         vector_config=Configure.Vectors.self_provided(
@@ -243,13 +310,12 @@ try:
                     "constructor_name": obj["constructor_name"],
                     "circuit_name": obj["circuit_name"],
                     "position": obj["position"],
-                    "position_text": obj["position_text"],
                     "points": obj["points"],
                     "round": obj["round"],
                     "grid": obj["grid"],
                     "laps": obj["laps"],
                     "status": obj["status"],
-                    "race_time": obj["race_time"]
+                    "result_time": obj["result_time"]
                 },
                 vector=obj["vector"]  # Manually inject the vector
             )
