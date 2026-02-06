@@ -79,7 +79,7 @@ class RAGConfig(BaseModel):
     """Configuration for RAG pipeline."""
     weaviate_url: str
     weaviate_api_key: SecretStr
-    hf_api_token: SecretStr
+    hf_token: SecretStr
     embedding_model_name: str = 'BAAI/BGE-M3'
     weaviate_collection_name: str = 'F1Context'
 
@@ -93,7 +93,7 @@ class F1RAGPipeline:
          Args:
             weaviate_url: Weaviate cluster URL
             weaviate_api_key: Weaviate API key
-            hf_api_token: HuggingFace API token
+            hf_token: HuggingFace API token
             embedding_model_name: Name of the embedding model to use
         """
         self.config = config
@@ -137,14 +137,14 @@ class F1RAGPipeline:
         """
         Queries Hugging Face using the NEW ROUTER endpoint (api-inference is deprecated).
         """
-        if not self.config.hf_api_token:
-            return "🚫 Error: HF_API_TOKEN is not loaded. Check your .env file."
+        if not self.config.hf_token:
+            return "🚫 Error: HF_TOKEN is not loaded. Check your .env file."
 
         # 1. NEW ROUTER URL
         api_url = "https://router.huggingface.co/v1/chat/completions"
 
         headers = {
-            "Authorization": f"Bearer {self.config.hf_api_token.get_secret_value()}",
+            "Authorization": f"Bearer {self.config.hf_token.get_secret_value()}",
             "Content-Type": "application/json"
         }
 
@@ -188,7 +188,8 @@ class F1RAGPipeline:
                 LOGGER.warning("HF Router timeout after %s attempts", max_retries)
                 return "⏱️ The model is busy. Please try again."
             except requests.exceptions.HTTPError:
-                if response.status_code in (502, 503, 504) and attempt < max_retries - 1:
+                if response.status_code in (
+                        502, 503, 504) and attempt < max_retries - 1:
                     time.sleep(delay_seconds)
                     delay_seconds *= 2
                     continue
@@ -243,38 +244,24 @@ class F1RAGPipeline:
                 filters.append(
                     Filter.by_property("race_name").contains_any([race_name])
                 )
-                print(f"   ✓ Filter: race contains '{race_name}'")
 
             if circuit_name:
                 filters.append(
                     Filter.by_property("circuit_name").contains_any([circuit_name])
                 )
-                print(f"   ✓ Filter: circuit contains '{circuit_name}'")
 
             if driver_name:
                 filters.append(
                     Filter.by_property("driver_name").contains_any([driver_name])
                 )
-                print(f"   ✓ Filter: driver contains '{driver_name}'")
 
             if constructor:
                 filters.append(
                     Filter.by_property("constructor_name").contains_any([constructor])
                 )
-                print(f"   ✓ Filter: team contains '{constructor}'")
 
             if is_winner_question(user_question):
                 filters.append(Filter.by_property("position").equal(1))
-                print(f"   ✓ Filter: position=1 (winners)")
-
-            print(f"\n🔍 Query: '{user_question}'")
-            print("📊 DEBUG - Extracted values:")
-            print(f"   year: {year}")
-            print(f"   race_name: {race_name}")
-            print(f"   circuit_name: {circuit_name}")
-            print(f"   driver_name: {driver_name}")
-            print(f"   constructor: {constructor}")
-            print(f"   is_winner: {is_winner_question(user_question)}")
 
             combined_filter = None
             if filters:
@@ -291,10 +278,6 @@ class F1RAGPipeline:
 
             if wins_count_query:
                 limit = MAX_SEASON_RACES
-
-            print(
-                f"→ alpha={alpha}, limit={limit}, filters={
-                    'yes' if combined_filter else 'none'}")
 
             context_text = ""
             collection = self.weaviate_client.collections.get(
@@ -332,28 +315,17 @@ class F1RAGPipeline:
 
             if not response.objects:
                 return (
-                    f"❌ No race data found.\n\n"
-                    f"Try:\n"
-                    f"- Simpler query\n"
-                    f"- Different race or circuit name (e.g., 'British' or 'Silverstone')\n"
-                    f"- Checking the year (data: 1950-2024)"
-                )
+                    "❌ No race data found.\n\n"
+                    "Try:\n"
+                    "- Simpler query\n"
+                    "- Different race or circuit name (e.g., 'British' or 'Silverstone')\n"
+                    "- Checking the year (data: 1950-2024)")
 
             print(
                 f"\n🔍 Retrieved {len(response.objects)} results for: '{user_question}'")
             contexts = []
             for idx, obj in enumerate(response.objects, 1):
                 props = obj.properties
-
-                print(
-                    f"  [{idx}] {props.get('year')} {props.get('race_name')} @ "
-                    f"{props.get('circuit_name')} - {props.get('driver_name')} "
-                    f"(P{props.get('position')}) - {props.get('constructor_name')} - "
-                    f"{props.get('points')} pts - "
-                    f"Grid {props.get('grid')}, Laps {props.get('laps')}, "
-                    f"Status {props.get('status')}, Time {props.get('result_time')}, "
-                    f"Round {props.get('round')}"
-                )
 
                 context_block = (
                     f"--- Result {idx} ---\n"
@@ -387,7 +359,7 @@ class F1RAGPipeline:
 def create_rag_pipeline(
     weaviate_url: str,
     weaviate_api_key: str,
-    hf_api_token: str,
+    hf_token: str,
     embedding_model_name: str = 'BAAI/BGE-M3'
 ) -> F1RAGPipeline:
     """
@@ -396,7 +368,7 @@ def create_rag_pipeline(
     Args:
         weaviate_url: Weaviate cluster URL
         weaviate_api_key: Weaviate API key
-        hf_api_token: HuggingFace API token
+        hf_token: HuggingFace API token
         embedding_model_name: Embedding model to use
 
     Returns:
@@ -405,7 +377,7 @@ def create_rag_pipeline(
     config = RAGConfig(
         weaviate_url=weaviate_url,
         weaviate_api_key=weaviate_api_key,
-        hf_api_token=hf_api_token,
+        hf_token=hf_token,
         embedding_model_name=embedding_model_name
     )
     return F1RAGPipeline(config)
@@ -421,9 +393,9 @@ if __name__ == "__main__":
 
     WEAVIATE_URL = os.environ.get("WEAVIATE_URL")
     WEAVIATE_API_KEY = os.environ.get("WEAVIATE_API_KEY")
-    HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
+    HF_TOKEN = os.environ.get("HF_TOKEN")
 
-    if not all([WEAVIATE_URL, WEAVIATE_API_KEY, HF_API_TOKEN]):
+    if not all([WEAVIATE_URL, WEAVIATE_API_KEY, HF_TOKEN]):
         print("❌ Missing environment variables")
         exit(1)
 
@@ -431,7 +403,7 @@ if __name__ == "__main__":
     pipeline = create_rag_pipeline(
         weaviate_url=WEAVIATE_URL,
         weaviate_api_key=WEAVIATE_API_KEY,
-        hf_api_token=HF_API_TOKEN
+        hf_token=HF_TOKEN
     )
 
     # Test queries
@@ -444,8 +416,8 @@ if __name__ == "__main__":
         for query in test_queries:
             print(f"\n{'=' * 80}")
             print(f"Q: {query}")
-            answer = pipeline.query(query, None)
-            print(f"\n💬 Answer: {answer}")
+            answer_received = pipeline.query(query, None)
+            print(f"\n💬 Answer: {answer_received}")
             print('=' * 80)
     finally:
         pipeline.close()
