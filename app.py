@@ -7,6 +7,7 @@ import asyncio
 import concurrent.futures
 import warnings
 from dotenv import load_dotenv
+
 import gradio as gr
 from rag_pipeline import F1RAGPipeline, RAGConfig
 
@@ -22,12 +23,14 @@ warnings.filterwarnings(
     category=ResourceWarning,
 )
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
 
 # --- CONFIGURATION ---
 WEAVIATE_URL = os.environ.get("WEAVIATE_URL")
 WEAVIATE_API_KEY = os.environ.get("WEAVIATE_API_KEY")
-HF_API_TOKEN = os.environ.get("HF_API_TOKEN")
+HF_TOKEN = os.environ.get("HF_TOKEN")
 
 if not WEAVIATE_URL or not WEAVIATE_API_KEY:
     print("❌ CRITICAL ERROR: Missing Weaviate Credentials in .env file.")
@@ -39,7 +42,7 @@ print("🔄 Initializing F1 RAG System...")
 rag_config = RAGConfig(
     weaviate_url=WEAVIATE_URL,
     weaviate_api_key=WEAVIATE_API_KEY,
-    hf_api_token=HF_API_TOKEN)
+    hf_token=HF_TOKEN)
 try:
     rag_pipeline = F1RAGPipeline(rag_config)
     print("✅ System Ready\n")
@@ -172,10 +175,14 @@ def create_ui():
     return demo
 
 
-if __name__ == "__main__":
+def launch_app():
     app = create_ui()
     try:
-        app.launch(theme=gr.themes.Soft(), css=CUSTOM_CSS)
+        app.launch(
+            theme=gr.themes.Soft(),
+            css=CUSTOM_CSS,
+            server_name="0.0.0.0",
+            server_port=7860)
     except KeyboardInterrupt:
         pass
     finally:
@@ -183,3 +190,7 @@ if __name__ == "__main__":
             app.close()
         except Exception:
             pass
+
+
+if __name__ == "__main__":
+    launch_app()
